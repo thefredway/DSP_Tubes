@@ -1,27 +1,38 @@
-# src/resp_utils.py
 import cv2
 import numpy as np
 import mediapipe as mp
 from mediapipe.tasks import python as mp_tasks
 from mediapipe.tasks.python import vision
 
-def create_pose_landmarker(model_path: str, use_gpu: bool=False):
+def create_pose_landmarker(model_path: str, use_gpu: bool=False, use_buffer: bool=True):
     """
-    Inisialisasi MediaPipe PoseLandmarker untuk IMAGE mode.
+    Inisialisasi MediaPipe PoseLandmarker untuk VIDEO mode.
+    Secara default menggunakan model_buffer (lebih aman untuk Windows absolut path).
     """
     BaseOptions = mp_tasks.BaseOptions
     PoseLandmarkerOptions = vision.PoseLandmarkerOptions
     VisionRunningMode = vision.RunningMode
-    delegate = BaseOptions.Delegate.GPU if use_gpu else BaseOptions.Delegate.CPU
+
+    if use_buffer:
+        with open(model_path, "rb") as f:
+            model_bytes = f.read()
+        base_options = BaseOptions(model_buffer=model_bytes)
+    else:
+        delegate = BaseOptions.Delegate.GPU if use_gpu else BaseOptions.Delegate.CPU
+        base_options = BaseOptions(model_asset_path=model_path, delegate=delegate)
+
     options = PoseLandmarkerOptions(
-        base_options=BaseOptions(model_asset_path=model_path, delegate=delegate),
-        running_mode=VisionRunningMode.IMAGE,
+        base_options=base_options,
+        running_mode=VisionRunningMode.VIDEO,
+        output_pose_landmarks=True,
         num_poses=1,
         min_pose_detection_confidence=0.5,
         min_pose_presence_confidence=0.5,
         min_tracking_confidence=0.5
     )
+
     return vision.PoseLandmarker.create_from_options(options)
+
 
 class RespTracker:
     """
@@ -69,18 +80,13 @@ class RespTracker:
         self.features = np.float32(pts)
 
     def update(self, frame: np.ndarray) -> float:
-        """
-        Lacak optical flow, return rata-rata posisi y (untuk sinyal respirasi).
-        Panggil initialize() dulu pada frame pertama.
-        """
+        """Lacak optical flow, return rata-rata posisi y (untuk sinyal respirasi)."""
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         new_pts, status, _ = cv2.calcOpticalFlowPyrLK(
             self.old_gray, gray, self.features, None, **self.lk_params
         )
         good_old = self.features[status==1].reshape(-1,2)
         good_new = new_pts[status==1].reshape(-1,2)
-        # update for next iterasi
         self.features = good_new.reshape(-1,1,2)
         self.old_gray = gray
-        # rata-rata y
         return float(np.mean(good_new[:,1]))
