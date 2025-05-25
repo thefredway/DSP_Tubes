@@ -15,17 +15,21 @@ def cpu_POS(X: np.ndarray, fps: float) -> np.ndarray:
     H = np.zeros((e, f))
     for n in range(w, f):
         m = n - w + 1
-        Cn = X[:, :, m:n+1]
-        M = 1.0 / (np.mean(Cn, axis=2) + eps)
-        Cn = Cn * M[:, :, None]
+        Cn = X[:, :, m:n+1]                      # (e,3,w)
+        M = 1.0 / (np.mean(Cn, axis=2) + eps)    # (e,3)
+        Cn = Cn * M[:, :, None]                  # Normalized (e,3,w)
         S = np.tensordot(Q, Cn, axes=([2],[1]))  # (e,2,w)
-        S = np.swapaxes(S[0], 0, 1)               # (w,2) -> (2,w)
-        S1, S2 = S[:, :], S[:, :]
-        alpha = np.std(S1, axis=1)/(eps + np.std(S2, axis=1))
-        Hn = S1 + alpha[:,None]*S2
-        Hnm = Hn - np.mean(Hn, axis=1)[:,None]
+
+        Hnm = np.zeros((e, w))
+        for i in range(e):
+            S1, S2 = S[i, :, :]  # (2,w)
+            alpha = np.std(S1) / (np.std(S2) + eps)
+            Hn = S1 + alpha * S2
+            Hnm[i] = Hn - np.mean(Hn)
+
         H[:, m:n+1] += Hnm
     return H
+
 
 def extract_rppg(rgb_buffer: np.ndarray, fps: float,
                  lowcut: float = 0.8, highcut: float = 2.5,

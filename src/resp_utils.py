@@ -59,7 +59,7 @@ class RespTracker:
         h, w = frame.shape[:2]
         img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         mp_img = mp.Image(image_format=mp.ImageFormat.SRGB, data=img_rgb)
-        res = self.landmarker.detect(mp_img)
+        res = self.landmarker.detect_for_video(mp_img, timestamp_ms=0)
         if not res.pose_landmarks:
             raise RuntimeError("Pose tidak terdeteksi.")
         lm = res.pose_landmarks[0]
