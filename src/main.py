@@ -24,6 +24,11 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.abspath(os.path.join(script_dir, "..", "models", "blaze_face_short_range.tflite"))
 pose_path  = os.path.abspath(os.path.join(script_dir, "..", "models", "pose_landmarker.task"))
 
+# Print paths for debugging
+print(f"[DEBUG] Script directory: {script_dir}")
+print(f"[DEBUG] Face model path: {model_path}")
+print(f"[DEBUG] Pose model path: {pose_path}")
+
 def main():
     print("[DEBUG] Opening webcam...")
     cap = cv2.VideoCapture(0)
@@ -51,9 +56,8 @@ def main():
     sol_face_det = mp.solutions.face_detection.FaceDetection(
         model_selection=0,
         min_detection_confidence=0.3
-    )
-
-    print("[DEBUG] Loading pose landmarker model via buffer...")
+    )   
+    print("[DEBUG] Loading pose landmarker model from path...")
     pose_landmarker = create_pose_landmarker(pose_path)
     resp_tracker = RespTracker(pose_landmarker, x_size=150, y_size=120, shift_x=0, shift_y=40)
 

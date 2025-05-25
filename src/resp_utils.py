@@ -1,37 +1,37 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+import os
 from mediapipe.tasks import python as mp_tasks
 from mediapipe.tasks.python import vision
 
-def create_pose_landmarker(model_path: str, use_gpu: bool=False, use_buffer: bool=True):
+def create_pose_landmarker(model_path: str, use_gpu: bool=False):
     """
-    Inisialisasi MediaPipe PoseLandmarker untuk VIDEO mode.
-    Secara default menggunakan model_buffer (lebih aman untuk Windows absolut path).
+    Load pose_landmarker.task using buffer to avoid path issues.
     """
-    BaseOptions = mp_tasks.BaseOptions
-    PoseLandmarkerOptions = vision.PoseLandmarkerOptions
-    VisionRunningMode = vision.RunningMode
+    from mediapipe.tasks.python.core.base_options import BaseOptions
+    from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions, RunningMode
 
-    if use_buffer:
-        with open(model_path, "rb") as f:
-            model_bytes = f.read()
-        base_options = BaseOptions(model_buffer=model_bytes)
-    else:
-        delegate = BaseOptions.Delegate.GPU if use_gpu else BaseOptions.Delegate.CPU
-        base_options = BaseOptions(model_asset_path=model_path, delegate=delegate)
+    with open(model_path, "rb") as f:
+        model_content = f.read()
+
+    base_options = BaseOptions(
+        model_asset_buffer=model_content,
+        delegate=BaseOptions.Delegate.GPU if use_gpu else BaseOptions.Delegate.CPU
+    )
 
     options = PoseLandmarkerOptions(
         base_options=base_options,
-        running_mode=VisionRunningMode.VIDEO,
-        output_pose_landmarks=True,
+        running_mode=RunningMode.VIDEO,
         num_poses=1,
         min_pose_detection_confidence=0.5,
         min_pose_presence_confidence=0.5,
         min_tracking_confidence=0.5
     )
 
-    return vision.PoseLandmarker.create_from_options(options)
+    print(f"[DEBUG] Loaded model from buffer: {model_path}")
+    return PoseLandmarker.create_from_options(options)
+
 
 
 class RespTracker:
