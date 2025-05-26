@@ -29,6 +29,22 @@ print(f"[DEBUG] Script directory: {script_dir}")
 print(f"[DEBUG] Face model path: {model_path}")
 print(f"[DEBUG] Pose model path: {pose_path}")
 
+def show_countdown_overlay(cap, duration=5):
+    hints = [
+        "Pastikan pencahayaan cukup",
+        "Pastikan wajah terlihat jelas",
+        "Pastikan kamera menangkap bahu"
+    ]
+    for sec in range(duration, 0, -1):
+        ret, frame = cap.read()
+        if not ret: continue
+        h, w = frame.shape[:2]
+        cv2.putText(frame, f"Mulai dalam {sec}", (w//2 - 100, h//2), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,255), 4)
+        for i, hint in enumerate(hints):
+            cv2.putText(frame, hint, (30, 30 + i*30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
+        cv2.imshow("Webcam", frame)
+        cv2.waitKey(1000)
+
 def main():
     print("[DEBUG] Opening webcam...")
     cap = cv2.VideoCapture(0)
@@ -73,11 +89,13 @@ def main():
     initialized = False
 
     try:
+        show_countdown_overlay(cap, duration=5)
         while True:
             ret, frame = cap.read()
             print(f"[DEBUG] Frame {frame_idx}: ret={ret}")
             if not ret:
                 break
+            frame = cv2.resize(frame, (960, 720)) 
 
             img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             mp_img  = mp.Image(image_format=mp.ImageFormat.SRGB, data=img_rgb)
@@ -138,7 +156,7 @@ def main():
 
             if not initialized:
                 try:
-                    resp_tracker.initialize(frame)
+                    resp_tracker.initialize(frame, timestamp_ms=timestamp_ms)
                     initialized = True
                     print("[DEBUG] RespTracker initialized.")
                 except Exception as e:
@@ -146,11 +164,32 @@ def main():
 
             if initialized:
                 try:
+                    # Update Optical Flow untuk sinyal respirasi
                     resp_y = resp_tracker.update(frame)
                     resp_buffer.append(resp_y)
+
+                    # Update ulang titik bahu dari pose terbaru
+                    img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    mp_img = mp.Image(image_format=mp.ImageFormat.SRGB, data=img_rgb)
+                    res = pose_landmarker.detect_for_video(mp_img, timestamp_ms=timestamp_ms)
+                    if res.pose_landmarks:
+                        lm = res.pose_landmarks[0]
+                        ls, rs = lm[11], lm[12]
+                        h, w = frame.shape[:2]
+                        resp_tracker.shoulder_pts = [(int(ls.x * w), int(ls.y * h)), (int(rs.x * w), int(rs.y * h))]
+
+                    # Gambar titik bahu terbaru
+                    if resp_tracker.shoulder_pts:
+                        for pt in resp_tracker.shoulder_pts:
+                            cv2.circle(frame, pt, radius=5, color=(0, 0, 255), thickness=-1)
+
                 except Exception as e:
                     print("[DEBUG] RespTracker update failed:", e)
 
+
+            # Tambahkan teks instruksi
+            cv2.putText(frame, "Tekan Q untuk selesai", (20, frame.shape[0] - 20),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             cv2.imshow("Webcam", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -162,9 +201,18 @@ def main():
                 resp_sig = bandpass_filter(np.array(resp_buffer), LOW_RESP, HIGH_RESP, fs=FPS)
 
                 ax_rppg.cla(); ax_resp.cla()
-                ax_rppg.plot(rppg_sig); ax_rppg.set_title("rPPG (filtered)")
-                ax_resp.plot(resp_sig); ax_resp.set_title("Respirasi")
-                ax_rppg.grid(True); ax_resp.grid(True)
+
+                ax_rppg.plot(rppg_sig, color='blue', label='rPPG')
+                ax_rppg.set_title("Sinyal rPPG (detak jantung)")
+                ax_rppg.set_xlabel("Frame ke-"); ax_rppg.set_ylabel("Amplitudo")
+                ax_rppg.legend(); ax_rppg.grid(True)
+
+                ax_resp.plot(resp_sig, color='green', label='Respirasi')
+                ax_resp.set_title("Sinyal Respirasi (gerak bahu)")
+                ax_resp.set_xlabel("Frame ke-"); ax_resp.set_ylabel("Posisi Y (px)")
+                ax_resp.legend(); ax_resp.grid(True)
+
+                fig.tight_layout()
                 fig.canvas.draw(); plt.pause(0.001)
 
     finally:
