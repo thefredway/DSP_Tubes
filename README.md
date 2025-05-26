@@ -14,13 +14,17 @@ Dibuat untuk menyelesaikan tugas besar mata kuliah Pengolahan Sinyal Digital IF3
 qwerty
 
 ---
-## **Library**
+## **Library**   
 
 Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
 | **Library**                | **Fungsi**                                                                                         |
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
-| `cv2`                      | Digunakan untuk menangkap gambar dari kamera dan memproses gambar secara langsung.                 |
-| `mediapipe`                | Digunakan untuk mendeteksi landmark wajah, seperti posisi hidung, untuk mendeteksi gerakan kepala. |                                                  |
+| `opencv-python`                      | Digunakan untuk menangkap gambar dari kamera dan memproses gambar secara langsung.                 |
+| `numpy`                | 	blabka |        
+| `mediapipe` | blablabla |
+|`scipy` | blblblb |
+|`matplotlib` | blblbl | 
+
 
 ---
