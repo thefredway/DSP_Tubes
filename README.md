@@ -3,13 +3,12 @@ Dibuat untuk menyelesaikan tugas besar mata kuliah Pengolahan Sinyal Digital IF3
 
 ## **Anggota Kelompok**
 
-| **Nama**                    | **NIM**   | **ID GITHUB**                                                               |
-| --------------------------- | --------- | --------------------------------------------------------------------------- |
-| ZZZZZZZZZZZZZZZZZZZ| 1221400 | <a href="https://github.com/ |
-| ACCCCCCC        | 1221400 | <a href="https://github.com/               |
-| THHHHHHHH    | 122450006| <a href="https://github.com/                         |
+| Nama              | NIM       | GitHub                                                                 |
+|-------------------|-----------|------------------------------------------------------------------------|
+| ZZZZZZZZZZZZZZZZZZ| 1221400   | [@thefredway](https://github.com/thefredway)                           |
+| ACCCCCCC          | 1221400   | [@dwiarthurrevangga](https://github.com/dwiarthurrevangga)             |
+| THHHHHHHH         | 122450006 | [@ifaaja11](https://github.com/ifaaja11)                               |
 
----
 
 ## **Deskripsi Tugas Besar**
 qwerty
