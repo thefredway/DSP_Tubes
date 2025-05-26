@@ -5,9 +5,9 @@ Dibuat untuk menyelesaikan tugas besar mata kuliah Pengolahan Sinyal Digital IF3
 
 | Nama              | NIM       | GitHub                                                                 |
 |-------------------|-----------|------------------------------------------------------------------------|
-| ZZZZZZZZZZZZZZZZZZ| 1221400   | [@thefredway](https://github.com/thefredway)                           |
-| ACCCCCCC          | 1221400   | [@dwiarthurrevangga](https://github.com/dwiarthurrevangga)             |
-| THHHHHHHH         | 122450006 | [@ifaaja11](https://github.com/ifaaja11)                               |
+| Freddy Harahap | 1221400   | [@thefredway](https://github.com/thefredway)                           |
+| Angga Dwi Arthur        | 1221400   | [@dwiarthurrevangga](https://github.com/dwiarthurrevangga)             |
+| Siti Nur Aarifah      | 122450006 | [@ifaaja11](https://github.com/ifaaja11)                               |
 
 
 ## **Deskripsi Tugas Besar**
