@@ -21,10 +21,10 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 | **Library**                | **Fungsi**                                                                                         |
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
 | `opencv-python`                      | Digunakan untuk menangkap gambar dari kamera dan memproses gambar secara langsung.                 |
-| `numpy`                | 	blabka |        
-| `mediapipe` | blablabla |
-|`scipy` | blblblb |
-|`matplotlib` | blblbl | 
+| `numpy`                | 	Digunakan untuk manipulasi data array.|        
+| `mediapipe` | Digunakan untuk deteksi wajah dan landmark tubuh secara real-time menggunakan model.  |
+|`scipy` | Digunakan untuk menerapkan filter sinyal band-pass. |
+|`matplotlib` | 	Digunakan untuk memvisualisasikan sinyal rPPG (detak jantung) dan respirasi. | 
 
 
 ---
