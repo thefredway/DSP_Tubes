@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 import time
 from datetime import datetime
@@ -22,26 +23,40 @@ class GUIApp:
     def __init__(self, master):
         self.master = master
         self.master.title("DSP GUI - rPPG & Respirasi")
+        self.master.attributes("-fullscreen", True)
 
-        # Canvas video
-        self.canvas = tk.Canvas(master, width=640, height=480)
+        self.left_frame = tk.Frame(master)
+        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.right_frame = tk.Frame(master)
+        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+        # === Left Panel ===
+        self.canvas = tk.Canvas(self.left_frame, width=960, height=720)
         self.canvas.pack()
 
-        # Durasi rekaman
-        self.duration_label = tk.Label(master, text="Durasi (detik):")
+        self.countdown_label = tk.Label(self.left_frame, text="", font=("Arial", 48), fg="red")
+        self.countdown_label.pack(pady=10)
+
+        self.duration_label = tk.Label(self.left_frame, text="Durasi (detik):")
         self.duration_label.pack()
-        self.duration_entry = tk.Entry(master)
+        self.duration_entry = tk.Entry(self.left_frame)
         self.duration_entry.insert(0, "10")
         self.duration_entry.pack()
 
-        # Tombol aksi
-        self.btn_start = tk.Button(master, text="Mulai Rekam", command=self.start_recording_thread)
+        self.btn_start = tk.Button(self.left_frame, text="Mulai Rekam", command=self.start_recording_thread)
         self.btn_start.pack(pady=10)
 
-        self.btn_waveform = tk.Button(master, text="Lihat Waveform", command=self.plot_waveform)
-        self.btn_waveform.pack(pady=5)
+        self.btn_exit = tk.Button(self.left_frame, text="Keluar", command=self.exit_program)
+        self.btn_exit.pack(pady=10)
 
-        # Variabel internal
+        # === Right Panel ===
+        self.figure = plt.Figure(figsize=(8, 6), dpi=100)
+        self.ax1 = self.figure.add_subplot(211)
+        self.ax2 = self.figure.add_subplot(212)
+        self.canvas_plot = FigureCanvasTkAgg(self.figure, master=self.right_frame)
+        self.canvas_plot.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
         self.cap = None
         self.running = False
         self.rgb_buffer = []
@@ -52,7 +67,7 @@ class GUIApp:
         if self.cap and self.cap.isOpened():
             ret, frame = self.cap.read()
             if ret:
-                frame = cv2.resize(frame, (640, 480))
+                frame = cv2.resize(frame, (960, 720))
                 img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 img = ImageTk.PhotoImage(image=Image.fromarray(img))
                 self.canvas.create_image(0, 0, anchor=tk.NW, image=img)
@@ -62,16 +77,10 @@ class GUIApp:
 
     def countdown(self, seconds=5):
         for i in range(seconds, 0, -1):
-            ret, frame = self.cap.read()
-            if not ret: continue
-            frame = cv2.putText(frame, f"Mulai dalam {i}", (180, 240),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 4)
-            img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = ImageTk.PhotoImage(image=Image.fromarray(img))
-            self.canvas.create_image(0, 0, anchor=tk.NW, image=img)
-            self.canvas.image = img
+            self.countdown_label.config(text=str(i))
             self.master.update()
             time.sleep(1)
+        self.countdown_label.config(text="")
 
     def start_recording_thread(self):
         thread = Thread(target=self.start_recording)
@@ -110,10 +119,9 @@ class GUIApp:
         while frame_idx < frame_limit:
             ret, frame = self.cap.read()
             if not ret: break
-            frame = cv2.resize(frame, (640, 480))
+            frame = cv2.resize(frame, (960, 720))
 
-            # ROI wajah (tengah)
-            cx, cy, R = 320, 240, 80
+            cx, cy, R = 480, 360, 100
             l, r = max(0, cx - R), min(frame.shape[1], cx + R)
             t, b = max(0, cy - R), min(frame.shape[0], cy + R)
             roi = frame[t:b, l:r]
@@ -162,19 +170,23 @@ class GUIApp:
         bpm = len(peaks_rppg) * (60 / duration_sec)
         br = len(peaks_resp) * (60 / duration_sec)
 
-        fig, axs = plt.subplots(1, 2, figsize=(16, 8))
-        axs[0].plot(rppg, color='blue', label="rPPG")
-        axs[0].plot(peaks_rppg, rppg[peaks_rppg], 'rx')
-        axs[0].set_title(f"rPPG Signal\nBPM ≈ {bpm:.1f}")
-        axs[0].set_xlabel("Time"); axs[0].legend(); axs[0].grid(True)
+        self.ax1.clear()
+        self.ax2.clear()
 
-        axs[1].plot(resp, color='green', label="Respiration")
-        axs[1].plot(peaks_resp, resp[peaks_resp], 'rx')
-        axs[1].set_title(f"Respiration Signal\nBR ≈ {br:.1f} bpm")
-        axs[1].set_xlabel("Time"); axs[1].legend(); axs[1].grid(True)
+        self.ax1.plot(rppg, color='blue', label="rPPG")
+        self.ax1.plot(peaks_rppg, rppg[peaks_rppg], 'rx')
+        self.ax1.set_title(f"rPPG Signal\nBPM ≈ {bpm:.1f}")
+        self.ax1.set_xlabel("Time"); self.ax1.legend(); self.ax1.grid(True)
 
-        plt.tight_layout()
-        plt.show()
+        self.ax2.plot(resp, color='green', label="Respiration")
+        self.ax2.plot(peaks_resp, resp[peaks_resp], 'rx')
+        self.ax2.set_title(f"Respiration Signal\nBR ≈ {br:.1f} bpm")
+        self.ax2.set_xlabel("Time"); self.ax2.legend(); self.ax2.grid(True)
+
+        self.canvas_plot.draw()
+
+    def exit_program(self):
+        self.master.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()
