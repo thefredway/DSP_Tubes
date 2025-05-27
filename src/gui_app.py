@@ -6,13 +6,13 @@ import numpy as np
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 import os
-import csv
 import time
 from datetime import datetime
+from scipy.signal import find_peaks
+
 from rppg_utils import extract_rppg
 from resp_utils import create_pose_landmarker, RespTracker
 from filter_utils import bandpass_filter
-from scipy.signal import find_peaks
 
 FPS = 30.0
 LOW_RPPG, HIGH_RPPG = 0.8, 2.5
@@ -22,17 +22,27 @@ class GUIApp:
     def __init__(self, master):
         self.master = master
         self.master.title("DSP GUI - rPPG & Respirasi")
+
+        # Canvas video
         self.canvas = tk.Canvas(master, width=640, height=480)
         self.canvas.pack()
 
+        # Durasi rekaman
+        self.duration_label = tk.Label(master, text="Durasi (detik):")
+        self.duration_label.pack()
+        self.duration_entry = tk.Entry(master)
+        self.duration_entry.insert(0, "10")
+        self.duration_entry.pack()
+
+        # Tombol aksi
         self.btn_start = tk.Button(master, text="Mulai Rekam", command=self.start_recording_thread)
         self.btn_start.pack(pady=10)
 
         self.btn_waveform = tk.Button(master, text="Lihat Waveform", command=self.plot_waveform)
         self.btn_waveform.pack(pady=5)
 
+        # Variabel internal
         self.cap = None
-        self.frame = None
         self.running = False
         self.rgb_buffer = []
         self.resp_buffer = []
@@ -50,8 +60,8 @@ class GUIApp:
         if self.running:
             self.master.after(10, self.update_frame)
 
-    def countdown(self, duration=5):
-        for i in range(duration, 0, -1):
+    def countdown(self, seconds=5):
+        for i in range(seconds, 0, -1):
             ret, frame = self.cap.read()
             if not ret: continue
             frame = cv2.putText(frame, f"Mulai dalam {i}", (180, 240),
@@ -68,6 +78,15 @@ class GUIApp:
         thread.start()
 
     def start_recording(self):
+        try:
+            duration_sec = int(self.duration_entry.get())
+            if duration_sec <= 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Input Error", "Durasi harus berupa angka > 0")
+            return
+
+        frame_limit = int(duration_sec * FPS)
         self.cap = cv2.VideoCapture(0)
         if not self.cap.isOpened():
             messagebox.showerror("Error", "Tidak dapat membuka webcam.")
@@ -88,11 +107,12 @@ class GUIApp:
         initialized = False
         frame_idx = 0
 
-        while frame_idx < 300:
+        while frame_idx < frame_limit:
             ret, frame = self.cap.read()
             if not ret: break
             frame = cv2.resize(frame, (640, 480))
 
+            # ROI wajah (tengah)
             cx, cy, R = 320, 240, 80
             l, r = max(0, cx - R), min(frame.shape[1], cx + R)
             t, b = max(0, cy - R), min(frame.shape[0], cy + R)
