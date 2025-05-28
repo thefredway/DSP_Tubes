@@ -1,4 +1,5 @@
 import tkinter as tk
+import ctypes
 from tkinter import messagebox
 from threading import Thread
 import cv2
@@ -24,32 +25,35 @@ class GUIApp:
     def __init__(self, master):
         self.master = master
         self.master.title("DSP GUI - rPPG & Respirasi")
-        self.master.geometry("1600x900")
+        self.master.state('zoomed')  # full screen for better layout compatibility
         self.master.bind("<Escape>", lambda e: self.exit_program())
+
+        screen_width = self.master.winfo_screenwidth()
+        screen_height = self.master.winfo_screenheight()
 
         main_frame = tk.Frame(master)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.left_frame = tk.Frame(main_frame, width=960)
+        self.left_frame = tk.Frame(main_frame, width=int(screen_width * 0.6))
         self.left_frame.grid(row=0, column=0, sticky="nsew")
 
         self.right_frame = tk.Frame(main_frame)
         self.right_frame.grid(row=0, column=1, sticky="nsew")
 
-        main_frame.grid_columnconfigure(0, weight=1)
-        main_frame.grid_columnconfigure(1, weight=1)
+        main_frame.grid_columnconfigure(0, weight=3)
+        main_frame.grid_columnconfigure(1, weight=2)
         main_frame.grid_rowconfigure(0, weight=1)
 
         self.video_label = tk.Label(self.left_frame)
-        self.video_label.pack()
+        self.video_label.grid(row=0, column=0, sticky="nsew")
 
         self.top_controls = tk.Frame(self.left_frame)
-        self.top_controls.pack(pady=5)
+        self.top_controls.grid(row=1, column=0, pady=5)
         self.countdown_label = tk.Label(self.top_controls, text="", font=("Arial", 32), fg="red")
         self.countdown_label.pack()
 
         self.controls = tk.Frame(self.left_frame)
-        self.controls.pack(pady=10)
+        self.controls.grid(row=2, column=0, pady=10)
 
         self.duration_label = tk.Label(self.controls, text="Durasi (detik):")
         self.duration_label.grid(row=0, column=0)
@@ -74,9 +78,9 @@ class GUIApp:
         self.running = False
         self.rgb_buffer = []
         self.resp_buffer = []
-        self.r_signal = deque(maxlen=int(FPS*10))
-        self.g_signal = deque(maxlen=int(FPS*10))
-        self.b_signal = deque(maxlen=int(FPS*10))
+        self.r_signal = deque(maxlen=int(FPS * 10))
+        self.g_signal = deque(maxlen=int(FPS * 10))
+        self.b_signal = deque(maxlen=int(FPS * 10))
 
         self.update_video_frame()
 
@@ -135,7 +139,8 @@ class GUIApp:
 
         while frame_idx < frame_limit:
             ret, frame = self.cap.read()
-            if not ret: break
+            if not ret:
+                break
             frame = cv2.resize(frame, (960, 720))
 
             cx, cy, R = 480, 360, 100
@@ -181,8 +186,8 @@ class GUIApp:
         rppg = extract_rppg(rgb_arr, fps=FPS, lowcut=LOW_RPPG, highcut=HIGH_RPPG)
         resp = bandpass_filter(np.array(self.resp_buffer), LOW_RESP, HIGH_RESP, fs=FPS)
 
-        peaks_rppg, _ = find_peaks(rppg, distance=FPS//2)
-        peaks_resp, _ = find_peaks(resp, distance=FPS*2)
+        peaks_rppg, _ = find_peaks(rppg, distance=FPS // 2)
+        peaks_resp, _ = find_peaks(resp, distance=FPS * 2)
 
         duration_sec = len(rppg) / FPS
         bpm = len(peaks_rppg) * (60 / duration_sec)
@@ -212,6 +217,15 @@ class GUIApp:
         self.master.destroy()
 
 if __name__ == "__main__":
+    import ctypes
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    except Exception:
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except:
+            pass
+
     root = tk.Tk()
     app = GUIApp(root)
     root.mainloop()
