@@ -19,7 +19,7 @@ Proyek ini juga dilengkapi dengan antarmuka GUI berbasis Tkinter yang memungkink
 
 | Nama             | NIM       | GitHub                                                     |
 | ---------------- | --------- | ---------------------------------------------------------- |
-| Freddy Harahap   | 1221400   | [@thefredway](https://github.com/thefredway)               |
+| Freddy Harahap   | 122140018  | [@thefredway](https://github.com/thefredway)               |
 | Angga Dwi Arthur | 122140144 | [@dwiarthurrevangga](https://github.com/dwiarthurrevangga) |
 | Siti Nur Aarifah | 122450006 | [@ifaaja11](https://github.com/ifaaja11)                   |
 
@@ -29,7 +29,6 @@ Proyek ini juga dilengkapi dengan antarmuka GUI berbasis Tkinter yang memungkink
 
 Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
-<<<<<<< HEAD
 | **Library** | **Fungsi** |
 | --------------- | ------------------------------------------------------------------------- |
 | `opencv-python` | Menangkap gambar dari webcam dan memproses gambar/video secara real-time. |
