@@ -29,7 +29,6 @@ Proyek ini juga dilengkapi dengan antarmuka GUI berbasis Tkinter yang memungkink
 
 Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
-<<<<<<< HEAD
 | **Library** | **Fungsi** |
 | --------------- | ------------------------------------------------------------------------- |
 | `opencv-python` | Menangkap gambar dari webcam dan memproses gambar/video secara real-time. |
@@ -94,7 +93,21 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
 ## **Logbook**
 
+### Minggu 1
 
+- Inisialisasi github repo..........
+
+### Minggu 2
+
+-xxxxxxxxx
+
+### Minggu 3
+
+- xxxxxxxxx
+### Minggu 4
+
+- Pembuatan project overleaf untuk laporan tugas besar DSP.
+- xxxxxxx
 
 ---
 
