@@ -1,5 +1,6 @@
-opencv-python
 numpy
-mediapipe
 scipy
+opencv-python
+Pillow
 matplotlib
+mediapipe
