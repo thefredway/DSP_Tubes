@@ -121,7 +121,8 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 - Pembersihan kode, penambahan docstring, dan validasi akhir fungsi.
 - Penyusunan file 'README.md', 'requirements.txt', dan laporan.
 
-=======
+---
+
 | **Library** | **Fungsi** |
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
 |`Tkinter`| Digunakan untuk membangun antarmuka pengguna grafis (GUI) berbasis Python seperti tampilan video, tombol kontrol, dan grafik sinyal secara _real-time._|
@@ -138,7 +139,6 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 |`Random`|Digunakan dalam implementasi algoritma Cat Swarm Optimizationcuntuk menginisialisasi populasi dan variasi kandidat parameter.|
 |`Collections.deque`| Digunakan untuk menyimpan buffer sinyal RGB dan respirasi secara efisien dengan batas waktu (_rolling buffer_).|
 
-> > > > > > > 526a753f8a5889743f1361dc70edf77b7d9d88f3
 
 ---
 
