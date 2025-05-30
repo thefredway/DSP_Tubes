@@ -94,6 +94,34 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
 ## **Logbook**
 
+### Minggu 1
+
+- Membuat struktur proyek dan script utama untuk pembacaan video.
+- Implementasi 'rppg_utils.py' dan 'resp_utils.py'.
+- Menambahkan fungsi 'cpu_POS' dan filtering sinyal.
+- Eksperimen awal dengan perekaman dan plotting sinyal respirasi dan rPPG.
+
+### Minggu 2
+
+- Implementasi 'bandpass_filter' dan analisis puncak sinyal.
+- Debugging kualitas sinyal dan peningkatan hasil tracking bahu.
+- Perekaman video dengan pulse marker dan ekspor data ke CSV.
+- Penyesuaian konfigurasi untuk real-time tracking.
+
+### Minggu 3
+
+- Membangun GUI interaktif berbasis Tkinter.
+- Menambahkan countdown, real-time video preview, dan plotting matplotlib.
+- Penambahan input durasi perekaman dan penanganan error.
+- GUI menampilkan sinyal dan indikator detak jantung/pernapasan.
+
+### Minggu 4
+
+- Integrasi modul optimasi parameter dengan GUI.
+- Penambahan tombol bantuan dan penjelasan penggunaan aplikasi.
+- Pembersihan kode, penambahan docstring, dan validasi akhir fungsi.
+- Penyusunan file 'README.md', 'requirements.txt', dan laporan.
+
 =======
 | **Library** | **Fungsi** |
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
