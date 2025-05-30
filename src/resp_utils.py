@@ -4,12 +4,14 @@ import mediapipe as mp
 
 def create_pose_landmarker(model_path: str, use_gpu: bool=False):
     """
-    Memuat model pose_landmarker dari file `.task`.
-    Params:
-      model_path : path ke file .task
-      use_gpu    : gunakan GPU jika tersedia
+    Memuat model `pose_landmarker` untuk deteksi pose tubuh menggunakan MediaPipe.
+    
+    Parameter:
+    - model_path: path ke file .task
+    - use_gpu: jika True maka menggunakan GPU, default CPU
+
     Return:
-      objek PoseLandmarker
+    - objek PoseLandmarker yang sudah diinisialisasi
     """
     from mediapipe.tasks.python.core.base_options import BaseOptions
     from mediapipe.tasks.python.vision import PoseLandmarker, PoseLandmarkerOptions, RunningMode
@@ -92,11 +94,13 @@ class RespTracker:
 
     def update(self, frame: np.ndarray) -> float:
         """
-        Lacak Optical Flow dan kembalikan rata-rata y (untuk sinyal respirasi).
-        Params:
-          frame : frame saat ini
+        Melacak Optical Flow dan mengembalikan posisi vertikal rata-rata.
+
+        Parameter:
+        - frame: frame gambar
+
         Return:
-          float : nilai rata-rata posisi vertikal fitur
+        - nilai rata-rata posisi y dari fitur pelacakan
         """
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         new_pts, status, _ = cv2.calcOpticalFlowPyrLK(self.old_gray, gray, self.features, None, **self.lk_params)

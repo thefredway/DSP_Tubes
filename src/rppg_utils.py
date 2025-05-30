@@ -1,18 +1,25 @@
-# src/rppg_utils.py
 import numpy as np
 from filter_utils import bandpass_filter
 
 def cpu_POS(X: np.ndarray, fps: float) -> np.ndarray:
     """
-    POS algorithm (Wang et al. 2016).
-    Input X shape = (e, 3, f), output H shape = (e, f).
+    Menghitung sinyal rPPG dengan metode POS (Plane-Orthogonal-to-Skin).
+    
+    Parameter:
+    - X: array (e, 3, f) berisi sinyal RGB dari frame
+    - fps: frame per second (sampling rate)
+
+    Return:
+    - H: array (e, f) hasil estimasi sinyal POS
     """
     eps = 1e-9
     e, c, f = X.shape
     w = int(1.6 * fps)
+
     P = np.array([[0, 1, -1], [-2, 1, 1]])
     Q = np.stack([P]*e, axis=0)  # shape (e,2,3)
     H = np.zeros((e, f))
+
     for n in range(w, f):
         m = n - w + 1
         Cn = X[:, :, m:n+1]                      # (e,3,w)
@@ -35,13 +42,16 @@ def extract_rppg(rgb_buffer: np.ndarray, fps: float,
                  lowcut: float = 0.8, highcut: float = 2.5,
                  filter_order: int = 5) -> np.ndarray:
     """
-    Hitung rPPG dari buffer RGB.
-    Params:
-      rgb_buffer   : array shape (3, f) dengan urutan [R;G;B]
-      fps          : frame rate
-      lowcut/highcut : batas filter (Hz)
+    Ekstraksi sinyal rPPG dari buffer RGB menggunakan metode POS dan filter bandpass.
+
+    Parameter:
+    - rgb_buffer: array (3, f), sinyal RGB
+    - fps: frame per second
+    - lowcut, highcut: batas frekuensi filter bandpass
+    - filter_order: orde filter
+
     Return:
-      rppg_filtered: sinyal rPPG ter-filter shape (f,)
+    - rppg_filtered: sinyal rPPG yang telah difilter
     """
     # tambahkan dim estimator=1
     sig = rgb_buffer[np.newaxis, ...]         # (1,3,f)

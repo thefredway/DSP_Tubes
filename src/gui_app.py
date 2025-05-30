@@ -25,12 +25,23 @@ DEFAULT_ORDER = 4
 LOW_RESP, HIGH_RESP = 0.1, 0.7
 
 class GUIApp:
+    """
+    Kelas utama GUI berbasis Tkinter untuk pemrosesan sinyal rPPG dan respirasi secara real-time.
+    Menggabungkan input webcam, deteksi wajah/bahu, filter, dan plotting sinyal.
+
+    Parameter:
+    - master : objek Tkinter utama (tk.Tk)
+    """
     def __init__(self, master):
+        """
+        Inisialisasi komponen GUI, kamera, dan plotting.
+        """
         self.master = master
         self.master.title("DSP GUI - rPPG & Respirasi")
         self.master.state('zoomed')
         self.master.bind("<Escape>", lambda e: self.exit_program())
 
+        # === Layout utama: kiri video, kanan plot ===
         main_frame = tk.Frame(master)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -44,32 +55,39 @@ class GUIApp:
         main_frame.grid_columnconfigure(1, weight=2)
         main_frame.grid_rowconfigure(0, weight=1)
 
+        # === Label video ===
         self.video_label = tk.Label(self.left_frame)
         self.video_label.grid(row=0, column=0, sticky="nsew")
 
+        # === Label status (contoh: sedang merekam...) ===
         self.status_label = tk.Label(self.left_frame, text="", font=("Arial", 24), fg="blue")
         self.status_label.grid(row=1, column=0, pady=5)
 
+        # === Frame kontrol: tombol dan input user ===
         self.controls = tk.Frame(self.left_frame)
         self.controls.grid(row=2, column=0, pady=10)
 
+        # Input durasi
         tk.Label(self.controls, text="Durasi (detik):").grid(row=0, column=0)
         self.duration_entry = tk.Entry(self.controls, width=5)
         self.duration_entry.insert(0, "10")
         self.duration_entry.grid(row=0, column=1)
 
+        # Tombol mulai rekam
         self.btn_start = tk.Button(self.controls, text="Mulai Rekam", command=self.start_recording_thread)
         self.btn_start.grid(row=0, column=2, padx=10)
 
+        # Label BPM dan BR
         self.bpm_label = tk.Label(self.controls, text="BPM: -")
         self.bpm_label.grid(row=0, column=3, padx=5)
-
         self.br_label = tk.Label(self.controls, text="BR: -")
         self.br_label.grid(row=0, column=4, padx=5)
 
+        # Tombol keluar
         self.btn_exit = tk.Button(self.controls, text="❌ Keluar", command=self.exit_program, bg="red", fg="white")
         self.btn_exit.grid(row=0, column=5, padx=10)
 
+        # Parameter rPPG
         tk.Label(self.controls, text="rPPG Low:").grid(row=1, column=0)
         self.low_rppg_entry = tk.Entry(self.controls, width=5)
         self.low_rppg_entry.insert(0, str(DEFAULT_LOW_RPPG))
@@ -83,7 +101,9 @@ class GUIApp:
         tk.Label(self.controls, text="Order:").grid(row=1, column=4)
         self.order_entry = tk.Entry(self.controls, width=5)
         self.order_entry.insert(0, str(DEFAULT_ORDER))
-        self.order_entry.grid(row=1, column=5)        
+        self.order_entry.grid(row=1, column=5)
+
+        # Tombol optimasi dan bantuan
         tk.Button(self.controls, text="🔍 Optimasi Parameter rPPG", command=self.run_filter_optimization).grid(row=2, column=0, pady=5)
         tk.Button(self.controls, text="🔍 Optimasi Parameter Respirasi", command=self.run_resp_optimization).grid(row=2, column=1, pady=5)
         tk.Button(self.controls, text="🆘 Help", command=self.show_help).grid(row=2, column=2, pady=5)
@@ -92,17 +112,18 @@ class GUIApp:
         tk.Label(self.controls, text="Resp Low (Hz):").grid(row=3, column=0)
         self.low_resp_label = tk.Label(self.controls, text=f"{LOW_RESP:.2f}")
         self.low_resp_label.grid(row=3, column=1)
-
         tk.Label(self.controls, text="Resp High (Hz):").grid(row=3, column=2)
         self.high_resp_label = tk.Label(self.controls, text=f"{HIGH_RESP:.2f}")
         self.high_resp_label.grid(row=3, column=3)
 
+        # === Grafik rPPG dan respirasi (matplotlib embedded) ===
         self.figure = plt.Figure(figsize=(7, 6), dpi=100)
         self.ax_rppg = self.figure.add_subplot(211)
         self.ax_resp = self.figure.add_subplot(212)
         self.canvas_plot = FigureCanvasTkAgg(self.figure, master=self.right_frame)
         self.canvas_plot.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
+        # === Inisialisasi variabel tracking dan buffer ===
         self.cap = cv2.VideoCapture(0)
         self.running = False
         self.blink = False
@@ -113,6 +134,10 @@ class GUIApp:
         self.update_video_frame()
 
     def blink_status(self):
+        """
+        Menampilkan tulisan "Sedang Merekam..." berkedip setiap 0.5 detik.
+        Dipanggil secara rekursif dengan `after`.
+        """
         if not self.running:
             self.status_label.config(text="")
             return
@@ -121,6 +146,9 @@ class GUIApp:
         self.blink_id = self.master.after(500, self.blink_status)
 
     def update_video_frame(self):
+        """
+        Update frame video dari webcam ke Tkinter setiap 10 ms (real-time).
+        """
         if not self.master.winfo_exists():
             return
         if self.cap and self.cap.isOpened():
@@ -134,9 +162,17 @@ class GUIApp:
         self.master.after(10, self.update_video_frame)
 
     def start_recording_thread(self):
+        """
+        Memulai thread baru untuk proses countdown dan perekaman.
+        Menghindari freeze GUI saat countdown.
+        """
         Thread(target=self.start_with_countdown).start()
 
     def start_with_countdown(self):
+        """
+        Countdown 5 detik sebelum memulai proses rekaman.
+        Setelah selesai countdown, mulai rekaman sinyal.
+        """
         self.running = False
         for i in range(5, 0, -1):
             self.master.after(0, lambda x=i: self.status_label.config(text=f"Mulai dalam {x}..."))
@@ -147,6 +183,10 @@ class GUIApp:
         self.start_recording()
 
     def start_recording(self):
+        """
+        Melakukan perekaman sinyal rPPG dan respirasi dari webcam selama durasi tertentu.
+        Hasil disimpan ke file CSV.
+        """
         try:
             duration_sec = int(self.duration_entry.get())
             if duration_sec <= 0:
@@ -159,7 +199,8 @@ class GUIApp:
         if not self.cap.isOpened():
             self.master.after(0, lambda: messagebox.showerror("Error", "Tidak dapat membuka webcam."))
             return
-
+        
+        # Inisialisasi pose landmark dan tracker respirasi
         pose_path = os.path.join("models", "pose_landmarker.task")
         pose_landmarker = create_pose_landmarker(pose_path)
         resp_tracker = RespTracker(pose_landmarker, x_size=150, y_size=120, shift_x=0, shift_y=40)
@@ -176,10 +217,13 @@ class GUIApp:
                 break
             frame = cv2.resize(frame, (960, 720))
             h, w = frame.shape[:2]
+
+            # Ambil ROI wajah tengah untuk rPPG
             roi = frame[h//3:h//3+120, w//2-60:w//2+60]
             mean_bgr = cv2.mean(roi)[:3]
             self.rgb_buffer.append([mean_bgr[2], mean_bgr[1], mean_bgr[0]])
 
+            # Inisialisasi tracking bahu
             if not initialized:
                 try:
                     resp_tracker.initialize(frame, timestamp_ms=frame_idx * 33)
@@ -187,6 +231,7 @@ class GUIApp:
                 except Exception:
                     pass
 
+            # Tracking respirasi dari optical flow
             if initialized:
                 try:
                     resp_y = resp_tracker.update(frame)
@@ -194,6 +239,7 @@ class GUIApp:
                 except Exception:
                     pass
 
+            # Update grafik real-time setiap 2 detik
             if time.time() - self.last_update_time > 2:
                 self.master.after(0, self.update_realtime_plot)
                 self.last_update_time = time.time()
@@ -206,6 +252,7 @@ class GUIApp:
             self.master.after(0, lambda: self.master.after_cancel(self.blink_id))
         self.master.after(0, lambda: self.status_label.config(text=""))
 
+        # Simpan data hasil rekaman ke file CSV
         os.makedirs("rppg_data", exist_ok=True)
         rppg_path = f"rppg_data/rppg_{now}.csv"
         resp_path = f"rppg_data/resp_{now}.csv"
@@ -215,6 +262,10 @@ class GUIApp:
         self.master.after(0, self.update_realtime_plot)
 
     def run_filter_optimization(self):
+        """
+        Melakukan optimasi parameter filter rPPG menggunakan algoritma Cat Swarm Optimization (CSO).
+        Parameter yang dioptimasi: lowcut, highcut, dan order filter.
+        """
         self.status_label.config(text="⚠️ Harap diam saat optimasi filter...")
         self.master.update()
         time.sleep(1.5)
@@ -230,6 +281,7 @@ class GUIApp:
             messagebox.showerror("Error", "Gagal mengakses buffer.")
             return
 
+        # Ekstraksi rPPG awal sebagai sinyal dasar
         signal = extract_rppg(rgb_arr, fps=FPS, lowcut=0.8, highcut=2.5)
         fs = FPS
 
@@ -258,6 +310,10 @@ class GUIApp:
         self.update_realtime_plot()
 
     def run_resp_optimization(self):
+        """
+        Melakukan optimasi parameter filter sinyal respirasi menggunakan CSO.
+        Parameter yang dioptimasi: lowcut dan highcut respirasi.
+        """
         global LOW_RESP, HIGH_RESP
         self.status_label.config(text="⚠️ Harap diam saat optimasi respirasi...")
         self.master.update()
@@ -282,6 +338,10 @@ class GUIApp:
         self.update_realtime_plot()
 
     def show_help(self):
+        """
+        Menampilkan panduan penggunaan aplikasi dalam bentuk pop-up message.
+        Menjelaskan urutan rekaman dan optimasi.
+        """
         help_text = (
             "🎬 Urutan Disarankan: Kalibrasi & Optimasi\n\n"
             "1️⃣ Rekaman Kalibrasi (10 detik)\n"
@@ -299,6 +359,10 @@ class GUIApp:
         messagebox.showinfo("Panduan Penggunaan", help_text)
 
     def update_realtime_plot(self):
+        """
+        Memperbarui grafik matplotlib dengan sinyal rPPG dan respirasi terbaru.
+        Menampilkan titik puncak dan menghitung estimasi BPM dan BR.
+        """
         if len(self.rgb_buffer) < FPS * 3:
             return
         rgb_arr = np.array(self.rgb_buffer).T
@@ -348,6 +412,10 @@ class GUIApp:
         self.canvas_plot.draw()
 
     def exit_program(self):
+        """
+        Menghentikan webcam dan menutup GUI.
+        Dipanggil saat klik tombol ❌ atau tekan tombol Escape.
+        """
         self.cap.release()
         self.master.destroy()
 
