@@ -37,10 +37,6 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
 Dengan asumsi bahwa Anda sudah mempunyai environment manager seperti conda. maka buat environment baru seperti ini. Clone / fork lalu jalankan perintah ini.
 
-### Dengan requirements.txt
-
-Jalankan perintah ini.
-
 ```yaml
 conda create -n respiration python
 ```
