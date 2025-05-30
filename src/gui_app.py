@@ -195,7 +195,9 @@ class GUIApp:
             self.master.after(0, lambda: messagebox.showerror("Input Error", "Durasi harus angka > 0"))
             return
 
+        # Hitung jumlah frame sesuai durasi user
         frame_limit = int(duration_sec * FPS)
+
         if not self.cap.isOpened():
             self.master.after(0, lambda: messagebox.showerror("Error", "Tidak dapat membuka webcam."))
             return
@@ -205,8 +207,10 @@ class GUIApp:
         pose_landmarker = create_pose_landmarker(pose_path)
         resp_tracker = RespTracker(pose_landmarker, x_size=150, y_size=120, shift_x=0, shift_y=40)
 
-        self.rgb_buffer.clear()
-        self.resp_buffer.clear()
+        # Sesuaikan panjang buffer dengan durasi user
+        self.rgb_buffer = deque(maxlen=frame_limit)
+        self.resp_buffer = deque(maxlen=frame_limit)
+
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
         initialized = False
         frame_idx = 0
