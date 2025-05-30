@@ -32,3 +32,33 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
 
 ---
+
+## How to run this
+
+Dengan asumsi bahwa Anda sudah mempunyai environment manager seperti conda. maka buat environment baru seperti ini. Clone / fork lalu jalankan perintah ini.
+
+### Dengan requirements.txt
+
+Jalankan perintah ini.
+
+```yaml
+conda create -n respiration python
+```
+
+Lalu buka environment yang sudah dibuat sebelumnya dengan
+
+```yaml
+conda activate respiration
+```
+
+Jalankan perintah ini untuk menginstall library yang dibutuhkan.
+
+```yaml
+pip install -r requirements.txt
+```
+
+Lalu jalankan perintah ini untuk menjalankan program.
+
+```yaml
+python gui_app.py
+```
