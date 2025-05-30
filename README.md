@@ -24,12 +24,19 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
 | **Library**                | **Fungsi**                                                                                         |
 | -------------------------- | -------------------------------------------------------------------------------------------------- |
+|`Tkinter`|  Digunakan untuk membangun antarmuka pengguna grafis (GUI) berbasis Python seperti tampilan video, tombol kontrol, dan grafik sinyal secara _real-time._|
 | `opencv-python`                      | Digunakan untuk menangkap gambar dari kamera dan memproses gambar secara langsung.                 |
 | `numpy`                | 	Digunakan untuk manipulasi data array.|        
 | `mediapipe` | Digunakan untuk deteksi wajah dan landmark tubuh secara real-time menggunakan model.  |
 |`scipy` | Digunakan untuk menerapkan filter sinyal band-pass. |
 |`matplotlib` | 	Digunakan untuk memvisualisasikan sinyal rPPG (detak jantung) dan respirasi. | 
-
+|`PIL (Pillow)` | Digunakan untuk konversi frmae OpenCV menjadi format yang bisa ditampilkan di Tkinter.|
+|`Thereading` | Digunakan untuk menjalankan proses perekaman dan pemrosesan secara paralel agar GUI tetap responsif.|
+|`Time dan Datetime`|Digunakan untuk menghitung durasi perekaman, mencatat timestamp, dan memberi nama file hasil rekaman berdasarkan waktu.|
+|`os`| Digunakan untuk membuat folder dan mengatur path file hasil rekaman CSV.|
+|`Ctypes`|Digunakan untuk mengatur DPI awareness agar tampilan GUI tidak buram pada layar dengan resolusi tinggi.|
+|`Random`|Digunakan dalam implementasi algoritma Cat Swarm Optimizationcuntuk menginisialisasi populasi dan variasi kandidat parameter.|
+|`Collections.deque`|  Digunakan untuk menyimpan buffer sinyal RGB dan respirasi secara efisien dengan batas waktu (_rolling buffer_).|
 
 ---
 
