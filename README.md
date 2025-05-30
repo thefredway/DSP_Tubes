@@ -20,7 +20,7 @@ Proyek ini juga dilengkapi dengan antarmuka GUI berbasis Tkinter yang memungkink
 | Nama             | NIM       | GitHub                                                     |
 | ---------------- | --------- | ---------------------------------------------------------- |
 | Freddy Harahap   | 122140018  | [@thefredway](https://github.com/thefredway)               |
-| Angga Dwi Arthur | 122140144 | [@dwiarthurrevangga](https://github.com/dwiarthurrevangga) |
+| Dwi Arthur Revangga | 122140144 | [@dwiarthurrevangga](https://github.com/dwiarthurrevangga) |
 | Siti Nur Aarifah | 122450006 | [@ifaaja11](https://github.com/ifaaja11)                   |
 
 ---
