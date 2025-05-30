@@ -29,20 +29,21 @@ Proyek ini juga dilengkapi dengan antarmuka GUI berbasis Tkinter yang memungkink
 
 Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 
-| **Library**     | **Fungsi**                                                                |
+<<<<<<< HEAD
+| **Library** | **Fungsi** |
 | --------------- | ------------------------------------------------------------------------- |
 | `opencv-python` | Menangkap gambar dari webcam dan memproses gambar/video secara real-time. |
-| `numpy`         | Digunakan untuk manipulasi array dan pemrosesan numerik.                  |
-| `mediapipe`     | Deteksi wajah dan landmark tubuh (pose/bahu) menggunakan model MediaPipe. |
-| `scipy`         | Menerapkan filter bandpass untuk memproses sinyal fisiologis.             |
-| `matplotlib`    | Visualisasi sinyal rPPG dan respirasi dalam bentuk grafik.                |
-| `Pillow`        | Mengubah format gambar dari OpenCV ke Tkinter.                            |
-| `tkinter`       | Membuat GUI aplikasi dan integrasi grafik dengan antarmuka.               |
-| `threading`     | Menjalankan proses perekaman secara paralel agar GUI tidak freeze.        |
-| `ctypes`        | Menyesuaikan DPI agar tampilan GUI lebih tajam.                           |
-| `datetime`      | Menyimpan hasil perekaman dengan timestamp unik.                          |
-| `collections`   | Mengelola buffer data sinyal dengan efisien menggunakan deque.            |
-| `random`        | Digunakan dalam proses evolusi populasi pada algoritma CSO.               |
+| `numpy` | Digunakan untuk manipulasi array dan pemrosesan numerik. |
+| `mediapipe` | Deteksi wajah dan landmark tubuh (pose/bahu) menggunakan model MediaPipe. |
+| `scipy` | Menerapkan filter bandpass untuk memproses sinyal fisiologis. |
+| `matplotlib` | Visualisasi sinyal rPPG dan respirasi dalam bentuk grafik. |
+| `Pillow` | Mengubah format gambar dari OpenCV ke Tkinter. |
+| `tkinter` | Membuat GUI aplikasi dan integrasi grafik dengan antarmuka. |
+| `threading` | Menjalankan proses perekaman secara paralel agar GUI tidak freeze. |
+| `ctypes` | Menyesuaikan DPI agar tampilan GUI lebih tajam. |
+| `datetime` | Menyimpan hasil perekaman dengan timestamp unik. |
+| `collections` | Mengelola buffer data sinyal dengan efisien menggunakan deque. |
+| `random` | Digunakan dalam proses evolusi populasi pada algoritma CSO. |
 
 ---
 
@@ -92,6 +93,25 @@ Beberapa library Python yang digunakan dalam Tugas Besar ini, beserta fungsinya:
 ---
 
 ## **Logbook**
+
+=======
+| **Library** | **Fungsi** |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+|`Tkinter`| Digunakan untuk membangun antarmuka pengguna grafis (GUI) berbasis Python seperti tampilan video, tombol kontrol, dan grafik sinyal secara _real-time._|
+| `opencv-python` | Digunakan untuk menangkap gambar dari kamera dan memproses gambar secara langsung. |
+| `numpy` | Digunakan untuk manipulasi data array.|  
+| `mediapipe` | Digunakan untuk deteksi wajah dan landmark tubuh secara real-time menggunakan model. |
+|`scipy` | Digunakan untuk menerapkan filter sinyal band-pass. |
+|`matplotlib` | Digunakan untuk memvisualisasikan sinyal rPPG (detak jantung) dan respirasi. |
+|`PIL (Pillow)` | Digunakan untuk konversi frmae OpenCV menjadi format yang bisa ditampilkan di Tkinter.|
+|`Thereading` | Digunakan untuk menjalankan proses perekaman dan pemrosesan secara paralel agar GUI tetap responsif.|
+|`Time dan Datetime`|Digunakan untuk menghitung durasi perekaman, mencatat timestamp, dan memberi nama file hasil rekaman berdasarkan waktu.|
+|`os`| Digunakan untuk membuat folder dan mengatur path file hasil rekaman CSV.|
+|`Ctypes`|Digunakan untuk mengatur DPI awareness agar tampilan GUI tidak buram pada layar dengan resolusi tinggi.|
+|`Random`|Digunakan dalam implementasi algoritma Cat Swarm Optimizationcuntuk menginisialisasi populasi dan variasi kandidat parameter.|
+|`Collections.deque`| Digunakan untuk menyimpan buffer sinyal RGB dan respirasi secara efisien dengan batas waktu (_rolling buffer_).|
+
+> > > > > > > 526a753f8a5889743f1361dc70edf77b7d9d88f3
 
 ---
 
