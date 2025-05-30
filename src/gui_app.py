@@ -16,6 +16,7 @@ import ctypes
 from rppg_utils import extract_rppg
 from resp_utils import create_pose_landmarker, RespTracker
 from filter_utils import bandpass_filter
+from cso import cat_swarm_optimize, bandpass_and_eval
 
 FPS = 30.0
 DEFAULT_LOW_RPPG = 0.8
@@ -82,7 +83,19 @@ class GUIApp:
         tk.Label(self.controls, text="Order:").grid(row=1, column=4)
         self.order_entry = tk.Entry(self.controls, width=5)
         self.order_entry.insert(0, str(DEFAULT_ORDER))
-        self.order_entry.grid(row=1, column=5)
+        self.order_entry.grid(row=1, column=5)        
+        tk.Button(self.controls, text="🔍 Optimasi Parameter rPPG", command=self.run_filter_optimization).grid(row=2, column=0, pady=5)
+        tk.Button(self.controls, text="🔍 Optimasi Parameter Respirasi", command=self.run_resp_optimization).grid(row=2, column=1, pady=5)
+        tk.Button(self.controls, text="🆘 Help", command=self.show_help).grid(row=2, column=2, pady=5)
+
+        # Output untuk parameter respirasi
+        tk.Label(self.controls, text="Resp Low (Hz):").grid(row=3, column=0)
+        self.low_resp_label = tk.Label(self.controls, text=f"{LOW_RESP:.2f}")
+        self.low_resp_label.grid(row=3, column=1)
+
+        tk.Label(self.controls, text="Resp High (Hz):").grid(row=3, column=2)
+        self.high_resp_label = tk.Label(self.controls, text=f"{HIGH_RESP:.2f}")
+        self.high_resp_label.grid(row=3, column=3)
 
         self.figure = plt.Figure(figsize=(7, 6), dpi=100)
         self.ax_rppg = self.figure.add_subplot(211)
@@ -200,6 +213,90 @@ class GUIApp:
         np.savetxt(resp_path, np.array(self.resp_buffer), delimiter=",")
         self.master.after(0, lambda: messagebox.showinfo("Rekaman Selesai", f"Rekaman selesai dan disimpan di:\n{rppg_path}"))
         self.master.after(0, self.update_realtime_plot)
+
+    def run_filter_optimization(self):
+        self.status_label.config(text="⚠️ Harap diam saat optimasi filter...")
+        self.master.update()
+        time.sleep(1.5)
+        self.status_label.config(text="⏳ Sedang mengoptimasi filter...")
+        self.master.update()
+
+        try:
+            rgb_arr = np.array(self.rgb_buffer).T
+            if rgb_arr.shape[1] < FPS * 3:
+                messagebox.showwarning("Buffer Kosong", "Sinyal belum cukup untuk optimasi.")
+                return
+        except Exception:
+            messagebox.showerror("Error", "Gagal mengakses buffer.")
+            return
+
+        signal = extract_rppg(rgb_arr, fps=FPS, lowcut=0.8, highcut=2.5)
+        fs = FPS
+
+        def obj(x):
+            return bandpass_and_eval(signal, fs, bandpass_filter, x)
+
+        bounds = [(0.6, 1.2), (2.0, 3.0), (2, 8.01)]
+
+        best_param, best_score = cat_swarm_optimize(
+            objective_func=obj,
+            bounds=bounds,
+            n_cats=12,
+            max_iter=25
+        )
+
+        low, high, order = best_param
+        self.low_rppg_entry.delete(0, tk.END)
+        self.low_rppg_entry.insert(0, f"{low:.3f}")
+        self.high_rppg_entry.delete(0, tk.END)
+        self.high_rppg_entry.insert(0, f"{high:.3f}")
+        self.order_entry.delete(0, tk.END)
+        self.order_entry.insert(0, f"{int(order)}")
+
+        self.status_label.config(text="✅ Optimasi selesai. Parameter terbaik diterapkan.")
+        self.master.after(3000, lambda: self.status_label.config(text=""))
+        self.update_realtime_plot()
+
+    def run_resp_optimization(self):
+        global LOW_RESP, HIGH_RESP
+        self.status_label.config(text="⚠️ Harap diam saat optimasi respirasi...")
+        self.master.update()
+        time.sleep(1.5)
+        self.status_label.config(text="⏳ Sedang mengoptimasi respirasi...")
+        self.master.update()
+
+        signal = np.array(self.resp_buffer)
+        fs = FPS
+
+        def obj(x):
+            return bandpass_and_eval(signal, fs, bandpass_filter, x)
+
+        bounds = [(0.05, 0.4), (0.5, 0.9), (2, 8.01)]
+        best_param, _ = cat_swarm_optimize(obj, bounds, n_cats=12, max_iter=25)
+
+        LOW_RESP, HIGH_RESP, _ = best_param
+        self.low_resp_label.config(text=f"{LOW_RESP:.2f}")
+        self.high_resp_label.config(text=f"{HIGH_RESP:.2f}")        
+        self.status_label.config(text="✅ Optimasi respirasi selesai.")
+        self.master.after(3000, lambda: self.status_label.config(text=""))
+        self.update_realtime_plot()
+
+    def show_help(self):
+        help_text = (
+            "🎬 Urutan Disarankan: Kalibrasi & Optimasi\n\n"
+            "1️⃣ Rekaman Kalibrasi (10 detik)\n"
+            "- Klik 'Mulai Rekam' untuk merekam wajah dan bahu\n"
+            "- Jangan banyak gerak, pastikan pencahayaan cukup\n\n"
+            "2️⃣ Optimasi Parameter\n"
+            "- Klik '🔍 Optimasi Parameter rPPG' → parameter wajah\n"
+            "- Klik '🔍 Optimasi Parameter Respirasi' → parameter bahu\n"
+            "- Sistem mencari parameter terbaik untuk filter\n\n"            
+            "3️⃣ Rekaman Utama\n"
+            "- Klik 'Mulai Rekam' lagi sesuai dengan waktu yang diinginkan\n"
+            "- Menggunakan parameter hasil optimasi\n"
+            "- Grafik dan estimasi BPM/BR lebih stabil"
+        )
+        messagebox.showinfo("Panduan Penggunaan", help_text)
 
     def update_realtime_plot(self):
         if len(self.rgb_buffer) < FPS * 3:
